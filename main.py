@@ -4,14 +4,13 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiohttp import web
-from gtts import gTTS
 
 TOKEN="9154777216:AAHumTWFBm7STfTL1McBnPLtM8cprc0U_pI"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Asosiy menyu tugmalarini yasash funksiyasi
+# Asosiy menyu tugmalarini yasash
 def get_main_menu():
     builder = ReplyKeyboardBuilder()
     builder.button(text="💳 Balans va tarif")
@@ -21,7 +20,6 @@ def get_main_menu():
     builder.button(text="⚙️ Sozlamalar")
     builder.button(text="🎁 Do'st taklif qilish")
     builder.button(text="💬 Yordam")
-    # Tugmalar qanday joylashishini tartibga solish (har qatorda 2 tadan)
     builder.adjust(2, 2, 1, 2)
     return builder.as_markup(resize_keyboard=True)
 
@@ -32,12 +30,10 @@ async def start_handler(message: types.Message):
         reply_markup=get_main_menu()
     )
 
-# "Video tayyorlash" tugmasi bosilganda
 @dp.message(lambda message: message.text == "🤖 Video tayyorlash")
 async def video_menu(message: types.Message):
     await message.answer("🎬 Iltimos, video uchun tarixiy mavzu yuboring (masalan: *Ancient Rome*):")
 
-# Boshqa tugmalar uchun umumiy javob yoki o'z handler'lari
 @dp.message(lambda message: message.text == "💳 Balans va tarif")
 async def balance_handler(message: types.Message):
     await message.answer("Sizning balansingiz: 0 so'm. Tarif: Bepul 🆓")
@@ -46,27 +42,16 @@ async def balance_handler(message: types.Message):
 async def help_handler(message: types.Message):
     await message.answer("Savollar bo'yicha @admin ga murojaat qiling.")
 
-# Agar foydalanuvchi mavzu yuborsa (video yasash uchun)
+# Har qandaymatn yuborilganda ssenariy matnini chiqarish
 @dp.message()
-async def shorts_script_generator(message: types.Message):
+async def text_handler(message: types.Message):
     topic = message.text
-    
-    script_text = (
+    await message.answer(
+        f"🎬 **Mavzu:** {topic}\n\n"
+        f"📜 **Shorts ssenariysi:**\n"
         f"Did you know how {topic} actually changed human history forever? "
-        f"Back in the day, people struggled without it. Until one brave mind decided to take a risk and change everything!"
+        f"Back in the day, people struggled without it. Until one brave mind decided to change everything!"
     )
-    
-    await message.answer(f"🎬 **Mavzu:** {topic}\n📜 **Matn tayyorlandi!** Ovoz yuborilmoqda...")
-    
-    audio_path = f"voice_{message.from_user.id}.mp3"
-    tts = gTTS(text=script_text, lang='en', slow=False)
-    tts.save(audio_path)
-    
-    audio_file = types.FSInputFile(audio_path)
-    await message.answer_audio(audio=audio_file, caption="🎙 Shorts uchun tayyor inglizcha ovoz")
-    
-    if os.path.exists(audio_path):
-        os.remove(audio_path)
 
 async def handle(request):
     return web.Response(text="Bot is running!")
