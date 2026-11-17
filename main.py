@@ -5,12 +5,13 @@ from aiogram.filters import Command
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiohttp import web
 
-TOKEN="9154777216:AAHumTWFBm7STfTL1McBnPLtM8cprc0U_pI"
+# O'z Telegram bot tokeningizni shu yerga qo'ying:
+TOKEN = "9154777216:AAHumTWFBm7STfTL1McBnPLtM8cprc0U_pI"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Asosiy menyu tugmalarini yasash
+# Asosiy tugmali menyu
 def get_main_menu():
     builder = ReplyKeyboardBuilder()
     builder.button(text="💳 Balans va tarif")
@@ -26,13 +27,13 @@ def get_main_menu():
 @dp.message(Command("start"))
 async def start_handler(message: types.Message):
     await message.answer(
-        "Salom! 👋 Kerakli bo'limni tanlang:",
+        "Salom! 👋 YouTube Shorts Stickman botiga xush kelibsiz. Kerakli bo'limni tanlang:",
         reply_markup=get_main_menu()
     )
 
 @dp.message(lambda message: message.text == "🤖 Video tayyorlash")
 async def video_menu(message: types.Message):
-    await message.answer("🎬 Iltimos, video uchun tarixiy mavzu yuboring (masalan: *Ancient Rome*):")
+    await message.answer("🎬 Iltimos, YouTube Shorts uchun tarixiy mavzu yuboring (masalan: *Ancient Rome* yoki *The invention of wheel*):")
 
 @dp.message(lambda message: message.text == "💳 Balans va tarif")
 async def balance_handler(message: types.Message):
@@ -42,15 +43,17 @@ async def balance_handler(message: types.Message):
 async def help_handler(message: types.Message):
     await message.answer("Savollar bo'yicha @admin ga murojaat qiling.")
 
-# Har qandaymatn yuborilganda ssenariy matnini chiqarish
+# Har qanday mavzu yuborilganda Shorts ssenariysini chiqarish
 @dp.message()
 async def text_handler(message: types.Message):
     topic = message.text
     await message.answer(
-        f"🎬 **Mavzu:** {topic}\n\n"
-        f"📜 **Shorts ssenariysi:**\n"
-        f"Did you know how {topic} actually changed human history forever? "
-        f"Back in the day, people struggled without it. Until one brave mind decided to change everything!"
+        f"🎬 **Mavzu:** {topic}\n"
+        f"⏱ **Format:** YouTube Shorts (30 soniya)\n\n"
+        f"📜 **Tayyor ssenariy va matn:**\n"
+        f"\"Did you know how {topic} actually changed human history forever? "
+        f"Back in the day, people struggled without it. Until one brave mind decided to take a risk and change everything! "
+        f"And that is why our world looks the way it does today. Subscribe for more crazy history!\""
     )
 
 async def handle(request):
