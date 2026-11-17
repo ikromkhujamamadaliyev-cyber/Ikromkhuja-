@@ -2,6 +2,7 @@ import asyncio
 import os
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiohttp import web
 from gtts import gTTS
 
@@ -10,43 +11,60 @@ TOKEN="9154777216:AAHumTWFBm7STfTL1McBnPLtM8cprc0U_pI"
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
+# Asosiy menyu tugmalarini yasash funksiyasi
+def get_main_menu():
+    builder = ReplyKeyboardBuilder()
+    builder.button(text="💳 Balans va tarif")
+    builder.button(text="🤖 Video tayyorlash")
+    builder.button(text="🛒 Xizmatlar")
+    builder.button(text="📱 Virtual raqam")
+    builder.button(text="⚙️ Sozlamalar")
+    builder.button(text="🎁 Do'st taklif qilish")
+    builder.button(text="💬 Yordam")
+    # Tugmalar qanday joylashishini tartibga solish (har qatorda 2 tadan)
+    builder.adjust(2, 2, 1, 2)
+    return builder.as_markup(resize_keyboard=True)
+
 @dp.message(Command("start"))
 async def start_handler(message: types.Message):
     await message.answer(
-        "Salom! 👋 Men tarixiy Stickman Shorts ssenariysi va ovozini tayyorlab beruvchi botman.\n\n"
-        "Menga biror tarixiy mavzu yozib yuboring (masalan: *Ancient Rome* yoki *The invention of wheel*)."
+        "Salom! 👋 Kerakli bo'limni tanlang:",
+        reply_markup=get_main_menu()
     )
 
+# "Video tayyorlash" tugmasi bosilganda
+@dp.message(lambda message: message.text == "🤖 Video tayyorlash")
+async def video_menu(message: types.Message):
+    await message.answer("🎬 Iltimos, video uchun tarixiy mavzu yuboring (masalan: *Ancient Rome*):")
+
+# Boshqa tugmalar uchun umumiy javob yoki o'z handler'lari
+@dp.message(lambda message: message.text == "💳 Balans va tarif")
+async def balance_handler(message: types.Message):
+    await message.answer("Sizning balansingiz: 0 so'm. Tarif: Bepul 🆓")
+
+@dp.message(lambda message: message.text == "💬 Yordam")
+async def help_handler(message: types.Message):
+    await message.answer("Savollar bo'yicha @admin ga murojaat qiling.")
+
+# Agar foydalanuvchi mavzu yuborsa (video yasash uchun)
 @dp.message()
 async def shorts_script_generator(message: types.Message):
     topic = message.text
     
-    # 1. Ssenariy matni
     script_text = (
         f"Did you know how {topic} actually changed human history forever? "
-        f"Back in the day, people struggled without it. Until one brave mind decided to take a risk and change everything! "
-        f"And that is why our world looks the way it does today. Subscribe for more crazy history!"
+        f"Back in the day, people struggled without it. Until one brave mind decided to take a risk and change everything!"
     )
     
-    response_text = (
-        f"🎬 **Mavzu:** {topic}\n"
-        f"⏱ **Format:** YouTube Shorts (30 soniya)\n\n"
-        f"📜 **Inglizcha Matn (Voiceover):**\n\"{script_text}\"\n\n"
-        f"🔊 *Hozir siz uchun ovozli xabar tayyorlanmoqda...*"
-    )
+    await message.answer(f"🎬 **Mavzu:** {topic}\n📜 **Matn tayyorlandi!** Ovoz yuborilmoqda...")
     
-    await message.answer(response_text, parse_mode="Markdown")
-    
-    # 2. Matnni ingliz tilida ovozga (MP3) aylantirish
     audio_path = f"voice_{message.from_user.id}.mp3"
     tts = gTTS(text=script_text, lang='en', slow=False)
     tts.save(audio_path)
     
-    # 3. Ovozli xabarni Telegram'ga yuborish
     audio_file = types.FSInputFile(audio_path)
-    await message.answer_audio(audio=audio_file, caption="🎙 Shorts uchun tayyor inglizcha ovoz (Voiceover)")
+    await message.answer_audio(audio=audio_file, caption="🎙 Shorts uchun tayyor inglizcha ovoz")
     
-    # 4. Serverda qolgan vaqtinchalik faylni o'chirish
     if os.path.exists(audio_path):
         os.remove(audio_path)
 
