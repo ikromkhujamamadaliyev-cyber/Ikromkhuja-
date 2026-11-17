@@ -2,59 +2,46 @@ import asyncio
 import os
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiohttp import web
 
-# O'z Telegram bot tokeningizni shu yerga qo'ying:
+# O'z Telegram bot tokeningizni shu yerga yozing:
 TOKEN = "9154777216:AAHumTWFBm7STfTL1McBnPLtM8cprc0U_pI"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Asosiy tugmali menyu
-def get_main_menu():
-    builder = ReplyKeyboardBuilder()
-    builder.button(text="💳 Balans va tarif")
-    builder.button(text="🤖 Video tayyorlash")
-    builder.button(text="🛒 Xizmatlar")
-    builder.button(text="📱 Virtual raqam")
-    builder.button(text="⚙️ Sozlamalar")
-    builder.button(text="🎁 Do'st taklif qilish")
-    builder.button(text="💬 Yordam")
-    builder.adjust(2, 2, 1, 2)
-    return builder.as_markup(resize_keyboard=True)
-
 @dp.message(Command("start"))
 async def start_handler(message: types.Message):
     await message.answer(
-        "Salom! 👋 YouTube Shorts Stickman botiga xush kelibsiz. Kerakli bo'limni tanlang:",
-        reply_markup=get_main_menu()
+        "🎬 **YouTube Shorts Stickman Bot**ga xush kelibsiz!\n\n"
+        "Menga istalgan tarixiy mavzuni yozib yuboring (masalan: *Ancient Rome*, *The invention of fire*, *Alexander the Great*). "
+        "Men darhol Shorts uchun tayyor inglizcha ssenariy va matn tuzib beraman!"
     )
 
-@dp.message(lambda message: message.text == "🤖 Video tayyorlash")
-async def video_menu(message: types.Message):
-    await message.answer("🎬 Iltimos, YouTube Shorts uchun tarixiy mavzu yuboring (masalan: *Ancient Rome* yoki *The invention of wheel*):")
-
-@dp.message(lambda message: message.text == "💳 Balans va tarif")
-async def balance_handler(message: types.Message):
-    await message.answer("Sizning balansingiz: 0 so'm. Tarif: Bepul 🆓")
-
-@dp.message(lambda message: message.text == "💬 Yordam")
-async def help_handler(message: types.Message):
-    await message.answer("Savollar bo'yicha @admin ga murojaat qiling.")
-
-# Har qanday mavzu yuborilganda Shorts ssenariysini chiqarish
 @dp.message()
-async def text_handler(message: types.Message):
+async def shorts_generator(message: types.Message):
     topic = message.text
-    await message.answer(
+    
+    # YouTube Shorts uchun tayyor stikmen ssenariysi
+    response_text = (
         f"🎬 **Mavzu:** {topic}\n"
-        f"⏱ **Format:** YouTube Shorts (30 soniya)\n\n"
-        f"📜 **Tayyor ssenariy va matn:**\n"
-        f"\"Did you know how {topic} actually changed human history forever? "
-        f"Back in the day, people struggled without it. Until one brave mind decided to take a risk and change everything! "
-        f"And that is why our world looks the way it does today. Subscribe for more crazy history!\""
+        f"⏱ **Format:** YouTube Shorts (30 soniya)\n"
+        f"🎨 **Uslub:** Stickman History Animation\n\n"
+        f"--- \n"
+        f"📌 **1-SAHNA (0-5s - Hook / Diqqatni tortish):**\n"
+        f"🗣 *Inglizcha matn:* \"Did you know how {topic} actually changed human history forever?\"\n"
+        f"🖼 *Vizual Prompt:* A shocked stickman looking at a glowing historical object, 2D stickman art.\n\n"
+        f"📌 **2-SAHNA (5-20s - Asosiy hikoya):**\n"
+        f"🗣 *Inglizcha matn:* \"Back in the day, people struggled without it. Until one brave mind decided to take a risk and change everything!\"\n"
+        f"🖼 *Vizual Prompt:* Stickman characters working hard, lightbulb idea moment, simple black and white style.\n\n"
+        f"📌 **3-SAHNA (20-30s - Outro / Xulosa):**\n"
+        f"🗣 *Inglizcha matn:* \"And that is why our world looks the way it does today. Subscribe for more crazy history!\"\n"
+        f"🖼 *Vizual Prompt:* Modern stickman holding a smartphone next to ancient stickman, clean background.\n"
+        f"--- \n"
+        f"✅ *Holat:* Ssenariy tayyor! Buni ovozga aylantirib, videoga ulaymiz."
     )
+    
+    await message.answer(response_text, parse_mode="Markdown")
 
 async def handle(request):
     return web.Response(text="Bot is running!")
